@@ -21,6 +21,7 @@ import {
   clearOrganizerData,
   createLiveExecutor,
   isVerifiedZenBuild,
+  readSnapshot,
   saveProviderToken,
 } from "../zen-adapter.mjs";
 import {
@@ -394,6 +395,41 @@ test("live adapter desired-state methods avoid duplicate mutations", async () =>
   assert.deepEqual(calls, []);
   browserWindow.gZenWorkspaces.allStoredTabs.push({ ...tab });
   await assert.rejects(driver.setPinned("tab-a", false), { code: "TAB_NOT_FOUND" });
+});
+
+test("live snapshot assigns stale global essentials to the active Space", async () => {
+  const tab = {
+    id: "essential-a",
+    group: null,
+    label: "Essential",
+    linkedBrowser: { currentURI: { spec: "https://example.com/" } },
+    pinned: true,
+    selected: false,
+    userContextId: 0,
+    lastAccessed: NOW,
+    hasAttribute: name => name === "zen-essential",
+    getAttribute: name =>
+      name === "zen-workspace-id"
+        ? "deleted-space"
+        : name === "zen-essential"
+          ? "true"
+          : "",
+  };
+  const browserWindow = {
+    gBrowser: { tabGroups: [] },
+    gZenFolders: {},
+    gZenWorkspaces: {
+      activeWorkspace: "space-a",
+      allStoredTabs: [tab],
+      getWorkspaces: () => [{ uuid: "space-a", name: "Work", containerTabId: 0 }],
+      promiseInitialized: Promise.resolve(),
+    },
+    SessionStore: { promiseAllWindowsRestored: Promise.resolve() },
+    Services: { appinfo: { version: "test", appBuildID: "test" } },
+    customElements: { get: () => undefined },
+  };
+
+  assert.equal((await readSnapshot(browserWindow)).tabs[0].spaceId, "space-a");
 });
 
 test("provider projection omits URLs and local hostnames", () => {

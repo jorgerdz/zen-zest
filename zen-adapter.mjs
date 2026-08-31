@@ -63,6 +63,9 @@ export async function readSnapshot(browserWindow = getBrowserWindow()) {
     position,
     containerId: Number(space.containerTabId) || 0,
   }));
+  const spaceIds = new Set(spaces.map(space => space.id));
+  const activeSpaceId = String(gZenWorkspaces.activeWorkspace || "");
+  const fallbackSpaceId = spaceIds.has(activeSpaceId) ? activeSpaceId : spaces[0]?.id || "";
 
   const positions = new Map();
   const liveFolders = (gBrowser.tabGroups || []).filter(group => group?.isZenFolder);
@@ -112,6 +115,8 @@ export async function readSnapshot(browserWindow = getBrowserWindow()) {
       } catch {
         // Non-web URLs intentionally have no hostname.
       }
+      const essential = tab.getAttribute("zen-essential") === "true";
+      const reportedSpaceId = String(tab.getAttribute("zen-workspace-id") || "");
       return {
         id:
           tab.id && idCounts.get(tab.id) === 1
@@ -120,11 +125,12 @@ export async function readSnapshot(browserWindow = getBrowserWindow()) {
         title: String(tab.label || url),
         url,
         hostname,
-        spaceId: String(tab.getAttribute("zen-workspace-id") || ""),
+        spaceId:
+          essential && !spaceIds.has(reportedSpaceId) ? fallbackSpaceId : reportedSpaceId,
         folderId: folder ? String(folder.id) : null,
         containerId: Number(tab.userContextId) || 0,
         pinned: !!tab.pinned,
-        essential: tab.getAttribute("zen-essential") === "true",
+        essential,
         selected: !!tab.selected,
         splitViewId,
         lastAccessedAt: Number.isFinite(tab.lastAccessed) ? tab.lastAccessed : null,
