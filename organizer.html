@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Zen Organizer</title>
+    <link rel="stylesheet" href="organizer.css">
+    <script type="module" src="organizer-page.mjs"></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">ZEN ORGANIZER</p>
+        <h1>Your tabs, in one calm view.</h1>
+      </div>
+      <div class="header-actions">
+        <p id="status" role="status" aria-live="polite">Reading Zen…</p>
+        <button id="refresh" type="button">Refresh</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav class="sidebar" aria-label="Tab views">
+        <h2>Views</h2>
+        <div id="views" class="nav-list"></div>
+        <h2>Spaces</h2>
+        <div id="spaces" class="nav-list"></div>
+      </nav>
+
+      <main>
+        <section class="toolbar" aria-label="Tab filters">
+          <label class="search-field">
+            <span>Search</span>
+            <input id="search" type="search" placeholder="Title, host, Space, or Folder">
+          </label>
+          <label>
+            <span>Filter</span>
+            <select id="filter">
+              <option value="all">All states</option>
+              <option value="ungrouped">Ungrouped</option>
+              <option value="grouped">Grouped</option>
+              <option value="pinned">Pinned</option>
+              <option value="essential">Essential</option>
+              <option value="inactive">Not selected for 30+ days</option>
+            </select>
+          </label>
+          <label>
+            <span>Sort</span>
+            <select id="sort">
+              <option value="title">Title</option>
+              <option value="hostname">Hostname</option>
+              <option value="lastAccessed">Last accessed</option>
+              <option value="space">Space</option>
+              <option value="folder">Folder</option>
+            </select>
+          </label>
+        </section>
+
+        <section class="tab-panel" aria-labelledby="view-title">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">CURRENT VIEW</p>
+              <h2 id="view-title">All tabs</h2>
+            </div>
+            <p id="result-count">0 tabs</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th class="check-cell">
+                    <input id="select-all" type="checkbox" aria-label="Select all visible tabs">
+                  </th>
+                  <th>Tab</th>
+                  <th>Location</th>
+                  <th>Last selected</th>
+                </tr>
+              </thead>
+              <tbody id="tab-list"></tbody>
+            </table>
+            <p id="empty-state" hidden>No tabs match this view.</p>
+          </div>
+        </section>
+      </main>
+
+      <aside class="plan-panel" aria-labelledby="selection-title">
+        <p class="eyebrow">SELECTION</p>
+        <h2 id="selection-title"><span id="selected-count">0</span> tabs</h2>
+        <p>Stage changes here. Nothing changes Zen until the reviewed plan is approved.</p>
+        <label>
+          <span>Destination or parent Folder</span>
+          <select id="plan-target"></select>
+        </label>
+        <div class="action-grid">
+          <button id="stage-move" type="button">Stage move</button>
+          <button id="stage-pin" type="button">Pin</button>
+          <button id="stage-unpin" type="button">Unpin</button>
+          <button id="stage-close" class="danger" type="button">Stage close</button>
+        </div>
+        <label>
+          <span>Folder name</span>
+          <input id="folder-name" type="text" maxlength="200" placeholder="New or renamed Folder">
+        </label>
+        <div class="action-grid">
+          <button id="stage-folder" type="button">Create Folder</button>
+          <button id="stage-rename" type="button">Rename Folder</button>
+        </div>
+        <hr>
+        <div class="plan-heading">
+          <h3>Draft plan</h3>
+          <button id="clear-plan" class="quiet" type="button">Clear</button>
+        </div>
+        <p id="plan-validation" role="status" aria-live="polite">No staged changes.</p>
+        <div id="plan-list" class="plan-list"></div>
+        <button id="apply-plan" class="primary" type="button" disabled>Review and apply</button>
+        <section id="apply-result" class="apply-result" aria-live="polite" hidden>
+          <h3>Last apply</h3>
+          <p id="apply-result-summary"></p>
+          <ul id="apply-result-list"></ul>
+        </section>
+        <hr>
+        <details class="provider-panel">
+          <summary>Optional AI planner</summary>
+          <label>
+            <span>Provider</span>
+            <select id="provider-mode">
+              <option value="none">None (local only)</option>
+              <option value="ollama">Ollama</option>
+              <option value="openai-compatible">OpenAI-compatible</option>
+            </select>
+          </label>
+          <label>
+            <span>Endpoint</span>
+            <input id="provider-origin" type="url" value="http://127.0.0.1:11434" spellcheck="false" disabled>
+          </label>
+          <label>
+            <span>Model</span>
+            <input id="provider-model" type="text" autocomplete="off" disabled>
+          </label>
+          <label>
+            <span>Bearer token (optional)</span>
+            <input id="provider-token" type="password" autocomplete="off" disabled>
+          </label>
+          <label>
+            <span>Planning request</span>
+            <textarea id="provider-prompt" rows="4" placeholder="Example: group research tabs by topic" disabled></textarea>
+          </label>
+          <div class="action-grid">
+            <button id="preview-provider" type="button" disabled>Preview disclosure</button>
+            <button id="generate-plan" type="button" disabled>Generate plan</button>
+          </div>
+          <label id="provider-consent-row" class="consent-row" hidden>
+            <input id="provider-consent" type="checkbox">
+            <span>I approve sending this disclosure shape to this origin.</span>
+          </label>
+          <p id="provider-status" role="status" aria-live="polite">Provider is disabled.</p>
+          <pre id="provider-preview" hidden></pre>
+        </details>
+        <hr>
+        <h3>Snapshot</h3>
+        <dl id="snapshot-details"></dl>
+        <h3>Capabilities</h3>
+        <ul id="capabilities"></ul>
+        <button id="clear-organizer-data" class="danger full-width" type="button">Clear organizer data</button>
+        <p class="data-note">Clears drafts, provider settings, consent, results, and saved provider tokens. Zen tabs and Spaces are untouched.</p>
+      </aside>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,21 @@
+{
+  "id": "zen-organizer",
+  "name": "Zen Organizer",
+  "description": "Review and organize every Zen Space, Folder, and tab from one page.",
+  "homepage": "https://github.com/jorgerdz/zen-zest",
+  "author": "jorgerdz",
+  "version": "0.1.0",
+  "fork": ["zen"],
+  "tags": ["tabs", "organization", "privacy"],
+  "scripts": {
+    "organizer.uc.mjs": {
+      "include": ["chrome://browser/content/browser.xhtml"],
+      "loadOrder": 10
+    }
+  },
+  "style": {
+    "chrome": ""
+  },
+  "chromeManifest": "chrome.manifest",
+  "supportsUnload": true
+}
